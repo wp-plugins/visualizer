@@ -32,6 +32,14 @@ Charts are rendered using HTML5/SVG technology to provide cross-browser compatib
 1. Upload the files to the `/wp-content/plugins/visualizer/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 
+== Screenshots ==
+
+1. Chart type selection
+2. Chart data uploading
+3. Chart options editing
+4. Charts media library
+5. Charts library
+
 == Changelog ==
 
 = 1.0.0 =
