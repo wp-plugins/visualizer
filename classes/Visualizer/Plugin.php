@@ -30,7 +30,7 @@
 class Visualizer_Plugin {
 
 	const NAME    = 'visualizer';
-	const VERSION = '1.0.0';
+	const VERSION = '1.1.0';
 
 	// custom post types
 	const CPT_VISUALIZER = 'visualizer';
@@ -49,6 +49,10 @@ class Visualizer_Plugin {
 	const ACTION_CLONE_CHART  = 'visualizer-clone-chart';
 	const ACTION_DELETE_CHART = 'visualizer-delete-chart';
 	const ACTION_UPLOAD_DATA  = 'visualizer-upload-data';
+
+	// custom filters
+	const FILTER_GET_CHART_SERIES = 'visualizer-get-chart-series';
+	const FILTER_GET_CHART_DATA   = 'visualizer-get-chart-data';
 
 	/**
 	 * Singletone instance of the plugin.
