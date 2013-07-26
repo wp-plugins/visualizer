@@ -91,11 +91,15 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 			$chart = $this->_chart;
 		}
 
+		$type = get_post_meta( $chart->ID, Visualizer_Plugin::CF_CHART_TYPE, true );
+		$series = apply_filters( Visualizer_Plugin::FILTER_GET_CHART_SERIES, get_post_meta( $chart->ID, Visualizer_Plugin::CF_SERIES, true ), $chart->ID, $type );
+		$data = apply_filters( Visualizer_Plugin::FILTER_GET_CHART_DATA, unserialize( $chart->post_content ), $chart->ID, $type );
+
 		return array(
-			'type'     => get_post_meta( $chart->ID, Visualizer_Plugin::CF_CHART_TYPE, true ),
-			'series'   => get_post_meta( $chart->ID, Visualizer_Plugin::CF_SERIES, true ),
+			'type'     => $type,
+			'series'   => $series,
 			'settings' => get_post_meta( $chart->ID, Visualizer_Plugin::CF_SETTINGS, true ),
-			'data'     => unserialize( $chart->post_content ),
+			'data'     => $data,
 		);
 	}
 
@@ -308,6 +312,10 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 		wp_enqueue_style( 'visualizer-frame' );
 		wp_enqueue_script( 'visualizer-render' );
 		wp_localize_script( 'visualizer-render', 'visualizer', array(
+			'l10n'   => array(
+				'remotecsv_prompt' => esc_html__( 'Please, enter the URL of CSV file:', Visualizer_Plugin::NAME ),
+				'invalid_source'   => esc_html__( 'You have entered invalid URL. Please, insert proper URL.', Visualizer_Plugin::NAME ),
+			),
 			'charts' => array(
 				'canvas' => $data,
 			),
@@ -396,11 +404,17 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 			exit;
 		}
 
+		$source = null;
 		$render = new Visualizer_Render_Page_Update();
-		if ( !isset( $_FILES['data'] ) || $_FILES['data']['error'] != 0 ) {
+		if ( filter_input( INPUT_POST, 'remote_data', FILTER_VALIDATE_URL ) ) {
+			$source =  new Visualizer_Source_Csv_Remote( $_POST['remote_data'] );
+		} elseif ( isset( $_FILES['local_data'] ) && $_FILES['local_data']['error'] == 0 ) {
+			$source =  new Visualizer_Source_Csv( $_FILES['local_data']['tmp_name'] );
+		} else  {
 			$render->message = esc_html__( "CSV file with chart data was not uploaded. Please, try again.", Visualizer_Plugin::NAME );
-		} else {
-			$source = new Visualizer_Source_Csv( $_FILES['data']['tmp_name'] );
+		}
+
+		if ( $source ) {
 			if ( $source->fetch() ) {
 				$chart->post_content = $source->getData();
 				wp_update_post( $chart->to_array() );
@@ -409,10 +423,10 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 				update_post_meta( $chart->ID, Visualizer_Plugin::CF_SOURCE, $source->getSourceName() );
 				update_post_meta( $chart->ID, Visualizer_Plugin::CF_DEFAULT_DATA, 0 );
 
-				$render->data = json_encode( unserialize( $source->getData() ) );
+				$render->data = json_encode( $source->getRawData() );
 				$render->series = json_encode( $source->getSeries() );
 			} else {
-				$render->message = esc_html__( "CSV file is broken or incorrect. Please, try again.", Visualizer_Plugin::NAME );
+				$render->message = esc_html__( "CSV file is broken or invalid. Please, try again.", Visualizer_Plugin::NAME );
 			}
 		}
 
