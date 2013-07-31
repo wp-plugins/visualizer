@@ -29,6 +29,7 @@ Charts are rendered using HTML5/SVG technology to provide cross-browser compatib
 
 ### Knowledge Base ###
 Read how to [create a chart](http://visualizer.madpixels.net/knowledgebase/how-can-i-create-a-chart/) in the [Knowledge Base](http://visualizer.madpixels.net/knowledgebase/). More helpful articles:
+
 1. [How can I edit a chart?](http://visualizer.madpixels.net/knowledgebase/how-can-i-edit-a-chart/)
 1. [How can I clone a chart?](http://visualizer.madpixels.net/knowledgebase/how-can-i-clone-a-chart/)
 1. [How can I delete a chart?](http://visualizer.madpixels.net/knowledgebase/how-can-i-delete-a-chart/)
