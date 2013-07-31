@@ -235,17 +235,17 @@ class Visualizer_Module_Admin extends Visualizer_Module {
 		);
 
 		// add chart type filter to the query arguments
-		$type = filter_input( INPUT_GET, 'type' );
-		if ( $type && in_array( $type, Visualizer_Plugin::getChartTypes() ) ) {
+		$filter = filter_input( INPUT_GET, 'type' );
+		if ( $filter && in_array( $filter, Visualizer_Plugin::getChartTypes() ) ) {
 			$query_args['meta_query'] = array(
 				array(
 					'key'     => Visualizer_Plugin::CF_CHART_TYPE,
-					'value'   => $type,
+					'value'   => $filter,
 					'compare' => '=',
 				),
 			);
 		} else {
-			$type = 'all';
+			$filter = 'all';
 		}
 
 		// fetch charts
@@ -254,17 +254,21 @@ class Visualizer_Module_Admin extends Visualizer_Module {
 		while( $query->have_posts() ) {
 			$chart = $query->next_post();
 
-			// faetch and update settings
+			// fetch and update settings
 			$settings = get_post_meta( $chart->ID, Visualizer_Plugin::CF_SETTINGS, true );
 			unset( $settings['height'], $settings['width'] );
+
+			$type = get_post_meta( $chart->ID, Visualizer_Plugin::CF_CHART_TYPE, true );
+			$series = apply_filters( Visualizer_Plugin::FILTER_GET_CHART_SERIES, get_post_meta( $chart->ID, Visualizer_Plugin::CF_SERIES, true ), $chart->ID, $type );
+			$data = apply_filters( Visualizer_Plugin::FILTER_GET_CHART_DATA, unserialize( $chart->post_content ), $chart->ID, $type );
 
 			// add chart to the array
 			$charts['visualizer-' . $chart->ID] = array(
 				'id'       => $chart->ID,
-				'type'     => get_post_meta( $chart->ID, Visualizer_Plugin::CF_CHART_TYPE, true ),
-				'series'   => get_post_meta( $chart->ID, Visualizer_Plugin::CF_SERIES, true ),
+				'type'     => $type,
+				'series'   => $series,
 				'settings' => $settings,
-				'data'     => unserialize( $chart->post_content ),
+				'data'     => $data,
 			);
 		}
 
@@ -283,7 +287,7 @@ class Visualizer_Module_Admin extends Visualizer_Module {
 		$render = new Visualizer_Render_Library();
 
 		$render->charts = $charts;
-		$render->type = $type;
+		$render->type = $filter;
 		$render->types = self::_getChartTypesLocalized();
 		$render->pagination = paginate_links( array(
 			'base'    => add_query_arg( 'vpage', '%#%' ),
