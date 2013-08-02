@@ -3,8 +3,8 @@ Contributors: madpixels, straightforward
 Donate link:
 Tags: chart, charts, charting, graph, graphs, graphing, visualisation, visualise data, visualization, visualize data, HTML5, canvas, pie chart, line chart, bar chart, column chart, gauge chart, area chart, scatter chart, candlestick chart, geo chart, google visualization api
 Requires at least: 3.5
-Tested up to: 3.5.2
-Stable tag: 1.1.1
+Tested up to: 3.6
+Stable tag: 1.1.2
 License: GPL v2.0 or later
 License URI: http://www.opensource.org/licenses/gpl-license.php
 
@@ -51,6 +51,9 @@ Read how to [create a chart](http://visualizer.madpixels.net/knowledgebase/how-c
 5. Charts library
 
 == Changelog ==
+
+= 1.1.2 =
+* Compatibility issues with WordPress version 3.6 has been fixed.
 
 = 1.1.1 =
 * Active type tab in the charts library was fixed.
