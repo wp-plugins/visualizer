@@ -12,6 +12,20 @@
 	 * =========================================================================
 	 */
 
+	if (!_.isFunction(wpmV.prototype.make)) {
+		wpmV.prototype.make = function(tag, attrs, val) {
+			var html, attr;
+
+			html = '<' + tag;
+			for (attr in attrs) {
+				html += ' ' + attr + '="' + attrs[attr] + '"';
+			}
+			html += '>' + val + '</' + tag + '>';
+
+			return html;
+		};
+	}
+
 	wpmvv.Chart = wpmV.extend({
 		className: 'visualizer-library-chart-canvas',
 
@@ -139,8 +153,6 @@
 		renderCollection: function() {
 			var self = this;
 
-			self.views.dispose();
-
 			if (self.collection.length > 0) {
 				self.$el.html('');
 				self.collection.each(self.addChart, self);
@@ -183,6 +195,7 @@
 							paginationView.render();
 						}
 
+						self.renderCollection();
 						content.unlock();
 					}
 				}
