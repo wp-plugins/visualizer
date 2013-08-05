@@ -21,7 +21,7 @@
 // +----------------------------------------------------------------------+
 
 /**
- * Source manager for CSV files.
+ * Source manager for local CSV files.
  *
  * @category Visualizer
  * @package Source
@@ -35,10 +35,10 @@ class Visualizer_Source_Csv extends Visualizer_Source {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @access private
+	 * @access protected
 	 * @var string
 	 */
-	private $_filename;
+	protected $_filename;
 
 	/**
 	 * Constructor.
@@ -48,8 +48,8 @@ class Visualizer_Source_Csv extends Visualizer_Source {
 	 * @access public
 	 * @param string $filename The path to the file.
 	 */
-	public function __construct( $filename ) {
-		$this->_filename = $filename;
+	public function __construct( $filename = null ) {
+		$this->_filename = trim( $filename );
 	}
 
 	/**
@@ -60,7 +60,7 @@ class Visualizer_Source_Csv extends Visualizer_Source {
 	 * @access private
 	 * @param resource $handle The file handle resource.
 	 */
-	private function _fetchSeries( $handle ) {
+	private function _fetchSeries( &$handle ) {
 		// read column titles
 		$labels = fgetcsv( $handle );
 
@@ -71,10 +71,22 @@ class Visualizer_Source_Csv extends Visualizer_Source {
 			return false;
 		}
 
+		// if no types were setup, re read labels and empty types array
+		if ( !self::_validateTypes( $types ) ) {
+			// re open the file
+			fclose( $handle );
+			$handle = fopen( $this->_filename, 'rb' );
+
+			// re read the labels and empty types array
+			$labels = fgetcsv( $handle );
+			$types = array();
+		}
+
 		for ( $i = 0, $len = count( $labels ); $i < $len; $i++ ) {
+			$default_type = $i == 0 ? 'string' : 'number';
 			$this->_series[] = array(
 				'label' => $labels[$i],
-				'type'  => isset( $types[$i] ) ? $types[$i] : 'string',
+				'type'  => isset( $types[$i] ) ? $types[$i] : $default_type,
 			);
 		}
 
@@ -90,6 +102,11 @@ class Visualizer_Source_Csv extends Visualizer_Source {
 	 * @return boolean TRUE on success, otherwise FALSE.
 	 */
 	public function fetch() {
+		// if filename is empty return false
+		if ( empty( $this->_filename ) ) {
+			return false;
+		}
+
 		// set line endings auto detect mode
 		@ini_set( 'auto_detect_line_endings', true );
 
