@@ -41,14 +41,15 @@
 	-webkit-box-shadow: 0px 0px 8px #ddd;
 	box-shadow: 0px 0px 8px #ddd;
 	background-color: #efefef;
+	display: none;
 }
 
 .visualizer-chart-canvas {
 	border: 1px solid #ddd;
 	background-color: white;
 	position: relative;
-	width: 347px;
-	height: 271px;
+	width: 30%;
+	height: 18.75%;
 }
 
 .visualizer-nochart-canvas {
@@ -137,4 +138,8 @@
 a.page-numbers:hover {
 	background-color: lightcoral;
 	box-shadow: 0 0 5px lightpink;
+}
+
+.visualizer-library-pagination {
+	display: none;
 }
