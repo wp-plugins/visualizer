@@ -98,15 +98,19 @@ class Visualizer_Module_Admin extends Visualizer_Module {
 	 * @access public
 	 */
 	public function enqueueMediaScripts() {
-		wp_enqueue_style( 'visualizer-media', VISUALIZER_ABSURL . 'css/media.css', array( 'media-views' ), Visualizer_Plugin::VERSION );
+		global $typenow;
 
-		wp_enqueue_script( 'google-jsapi',               '//www.google.com/jsapi',                      array( 'media-editor' ),                null );
-		wp_enqueue_script( 'visualizer-media-model',      VISUALIZER_ABSURL . 'js/media/model.js',      array( 'google-jsapi' ),                Visualizer_Plugin::VERSION );
-		wp_enqueue_script( 'visualizer-media-collection', VISUALIZER_ABSURL . 'js/media/collection.js', array( 'visualizer-media-model' ),      Visualizer_Plugin::VERSION );
-		wp_enqueue_script( 'visualizer-media-controller', VISUALIZER_ABSURL . 'js/media/controller.js', array( 'visualizer-media-collection' ), Visualizer_Plugin::VERSION );
-		wp_enqueue_script( 'visualizer-media-view',       VISUALIZER_ABSURL . 'js/media/view.js',       array( 'visualizer-media-controller' ), Visualizer_Plugin::VERSION );
-		wp_enqueue_script( 'visualizer-media-toolbar',    VISUALIZER_ABSURL . 'js/media/toolbar.js',    array( 'visualizer-media-view' ),       Visualizer_Plugin::VERSION );
-		wp_enqueue_script( 'visualizer-media',            VISUALIZER_ABSURL . 'js/media.js',            array( 'visualizer-media-toolbar' ),    Visualizer_Plugin::VERSION );
+		if ( post_type_supports( $typenow, 'editor' ) ) {
+			wp_enqueue_style( 'visualizer-media', VISUALIZER_ABSURL . 'css/media.css', array( 'media-views' ), Visualizer_Plugin::VERSION );
+
+			wp_enqueue_script( 'visualizer-google-jsapi',    '//www.google.com/jsapi',                      array( 'media-editor' ),                null,                       true );
+			wp_enqueue_script( 'visualizer-media-model',      VISUALIZER_ABSURL . 'js/media/model.js',      array( 'visualizer-google-jsapi' ),     Visualizer_Plugin::VERSION, true );
+			wp_enqueue_script( 'visualizer-media-collection', VISUALIZER_ABSURL . 'js/media/collection.js', array( 'visualizer-media-model' ),      Visualizer_Plugin::VERSION, true );
+			wp_enqueue_script( 'visualizer-media-controller', VISUALIZER_ABSURL . 'js/media/controller.js', array( 'visualizer-media-collection' ), Visualizer_Plugin::VERSION, true );
+			wp_enqueue_script( 'visualizer-media-view',       VISUALIZER_ABSURL . 'js/media/view.js',       array( 'visualizer-media-controller' ), Visualizer_Plugin::VERSION, true );
+			wp_enqueue_script( 'visualizer-media-toolbar',    VISUALIZER_ABSURL . 'js/media/toolbar.js',    array( 'visualizer-media-view' ),       Visualizer_Plugin::VERSION, true );
+			wp_enqueue_script( 'visualizer-media',            VISUALIZER_ABSURL . 'js/media.js',            array( 'visualizer-media-toolbar' ),    Visualizer_Plugin::VERSION, true );
+		}
 	}
 
 	/**
@@ -235,17 +239,17 @@ class Visualizer_Module_Admin extends Visualizer_Module {
 		);
 
 		// add chart type filter to the query arguments
-		$type = filter_input( INPUT_GET, 'type' );
-		if ( $type && in_array( $type, Visualizer_Plugin::getChartTypes() ) ) {
+		$filter = filter_input( INPUT_GET, 'type' );
+		if ( $filter && in_array( $filter, Visualizer_Plugin::getChartTypes() ) ) {
 			$query_args['meta_query'] = array(
 				array(
 					'key'     => Visualizer_Plugin::CF_CHART_TYPE,
-					'value'   => $type,
+					'value'   => $filter,
 					'compare' => '=',
 				),
 			);
 		} else {
-			$type = 'all';
+			$filter = 'all';
 		}
 
 		// fetch charts
@@ -254,17 +258,21 @@ class Visualizer_Module_Admin extends Visualizer_Module {
 		while( $query->have_posts() ) {
 			$chart = $query->next_post();
 
-			// faetch and update settings
+			// fetch and update settings
 			$settings = get_post_meta( $chart->ID, Visualizer_Plugin::CF_SETTINGS, true );
 			unset( $settings['height'], $settings['width'] );
+
+			$type = get_post_meta( $chart->ID, Visualizer_Plugin::CF_CHART_TYPE, true );
+			$series = apply_filters( Visualizer_Plugin::FILTER_GET_CHART_SERIES, get_post_meta( $chart->ID, Visualizer_Plugin::CF_SERIES, true ), $chart->ID, $type );
+			$data = apply_filters( Visualizer_Plugin::FILTER_GET_CHART_DATA, unserialize( $chart->post_content ), $chart->ID, $type );
 
 			// add chart to the array
 			$charts['visualizer-' . $chart->ID] = array(
 				'id'       => $chart->ID,
-				'type'     => get_post_meta( $chart->ID, Visualizer_Plugin::CF_CHART_TYPE, true ),
-				'series'   => get_post_meta( $chart->ID, Visualizer_Plugin::CF_SERIES, true ),
+				'type'     => $type,
+				'series'   => $series,
 				'settings' => $settings,
-				'data'     => unserialize( $chart->post_content ),
+				'data'     => $data,
 			);
 		}
 
@@ -283,7 +291,7 @@ class Visualizer_Module_Admin extends Visualizer_Module {
 		$render = new Visualizer_Render_Library();
 
 		$render->charts = $charts;
-		$render->type = $type;
+		$render->type = $filter;
 		$render->types = self::_getChartTypesLocalized();
 		$render->pagination = paginate_links( array(
 			'base'    => add_query_arg( 'vpage', '%#%' ),
@@ -335,18 +343,9 @@ class Visualizer_Module_Admin extends Visualizer_Module {
 		if ( $plugin_file == plugin_basename( VISUALIZER_BASEFILE ) ) {
 			// knowledge base link
 			$plugin_meta[] = sprintf(
-				'<a href="http://visualizer.madpixels.net/knowledgebase/">%s</a>',
+				'<a href="https://github.com/madpixelslabs/visualizer/wiki">%s</a>',
 				esc_html__( 'Knowledge Base' )
 			);
-
-			// community link
-			$plugin_meta[] = sprintf(
-				'<a href="http://visualizer.madpixels.net/forums/">%s</a>',
-				esc_html__( 'Community', Visualizer_Plugin::NAME )
-			);
-
-			// github link
-			$plugin_meta[] = '<a href="https://github.com/madpixelslabs/visualizer">GitHub Repository</a>';
 		}
 
 		return $plugin_meta;
