@@ -97,6 +97,18 @@ abstract class Visualizer_Source {
 	}
 
 	/**
+	 * Returns raw data array.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function getRawData() {
+		return $this->_data;
+	}
+
+	/**
 	 * Normalizes values according to series' type.
 	 *
 	 * @since 1.0.0
@@ -119,12 +131,10 @@ abstract class Visualizer_Source {
 
 			switch ( $series['type'] ) {
 				case 'number':
-					$data[$i] = is_float( $data[$i] )
-						? floatval( $data[$i] )
-						: intval( $data[$i] );
+					$data[$i] = !empty( $data[$i] ) ? floatval( $data[$i] ) : null;
 					break;
 				case 'boolean':
-					$data[$i] = filter_validate( $data[$i], FILTER_VALIDATE_BOOLEAN );
+					$data[$i] = !empty( $data[$i] ) ? filter_validate( $data[$i], FILTER_VALIDATE_BOOLEAN ) : null;
 					break;
 				case 'timeofday':
 					$date = new DateTime( '1984-03-16T' . $data[$i] );
@@ -140,6 +150,55 @@ abstract class Visualizer_Source {
 			}
 		}
 
+		return $data;
+	}
+
+	/**
+	 * Validates series tyeps.
+	 *
+	 * @since 1.0.1
+	 *
+	 * @static
+	 * @access protected
+	 * @param array $types The icoming series types.
+	 * @return boolean TRUE if sereis types are valid, otherwise FALSE.
+	 */
+	protected static function _validateTypes( $types ) {
+		$allowed_types = array( 'string', 'number', 'boolean', 'date', 'datetime', 'timeofday' );
+		foreach ( $types as $type ) {
+			if ( !in_array( $type, $allowed_types ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Re populates series if the source is dynamic.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @access public
+	 * @param array $series The actual array of series.
+	 * @param int $chart_id The chart id.
+	 * @return array The re populated array of series or old one.
+	 */
+	public function repopulateSeries( $series, $chart_id ) {
+		return $series;
+	}
+
+	/**
+	 * Re populates data if the source is dynamic.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @access public
+	 * @param array $data The actual array of data.
+	 * @param int $chart_id The chart id.
+	 * @return array The re populated array of data or old one.
+	 */
+	public function repopulateData( $data, $chart_id ) {
 		return $data;
 	}
 
