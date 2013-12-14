@@ -93,7 +93,12 @@ abstract class Visualizer_Render_Sidebar_Graph extends Visualizer_Render_Sidebar
 	 * @access protected
 	 */
 	protected function _renderChartTitleSettings() {
-		parent::_renderChartTitleSettings();
+		self::_renderTextItem(
+			esc_html__( 'Chart Title', Visualizer_Plugin::NAME ),
+			'title',
+			$this->title,
+			esc_html__( 'Text to display above the chart.', Visualizer_Plugin::NAME )
+		);
 
 		self::_renderSelectItem(
 			esc_html__( 'Chart Title Position', Visualizer_Plugin::NAME ),
@@ -101,6 +106,13 @@ abstract class Visualizer_Render_Sidebar_Graph extends Visualizer_Render_Sidebar
 			$this->titlePosition,
 			$this->_positions,
 			esc_html__( 'Where to place the chart title, compared to the chart area.', Visualizer_Plugin::NAME )
+		);
+
+		self::_renderColorPickerItem(
+			esc_html__( 'Chart Title Color', Visualizer_Plugin::NAME ),
+			'titleTextStyle[color]',
+			isset( $this->titleTextStyle['color'] ) ? $this->titleTextStyle['color'] : null,
+			'#000'
 		);
 
 		echo '<div class="section-delimiter"></div>';
@@ -112,8 +124,49 @@ abstract class Visualizer_Render_Sidebar_Graph extends Visualizer_Render_Sidebar
 			$this->_positions,
 			esc_html__( 'Determines where to place the axis titles, compared to the chart area.', Visualizer_Plugin::NAME )
 		);
+	}
 
-		echo '<div class="section-delimiter"></div>';
+	/**
+	 * Renders general settings block for horizontal axis settings.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @access protected
+	 */
+	protected function _renderHorizontalAxisGeneratSettings() {
+		self::_renderTextItem(
+			esc_html__( 'Axis Title', Visualizer_Plugin::NAME ),
+			'hAxis[title]',
+			isset( $this->hAxis['title'] ) ? $this->hAxis['title'] : '',
+			esc_html__( 'The title of the horizontal axis.', Visualizer_Plugin::NAME )
+		);
+
+		self::_renderSelectItem(
+			esc_html__( 'Text Position', Visualizer_Plugin::NAME ),
+			'vAxis[textPosition]',
+			isset( $this->vAxis['textPosition'] ) ? $this->vAxis['textPosition'] : '',
+			$this->_positions,
+			esc_html__( 'Position of the horizontal axis text, relative to the chart area.', Visualizer_Plugin::NAME )
+		);
+
+		self::_renderSelectItem(
+			esc_html__( 'Direction', Visualizer_Plugin::NAME ),
+			'hAxis[direction]',
+			isset( $this->hAxis['direction'] ) ? $this->hAxis['direction'] : '',
+			array(
+				''   => '',
+				'1'  => esc_html__( 'Identical Direction', Visualizer_Plugin::NAME ),
+				'-1' => esc_html__( 'Reverse Direction', Visualizer_Plugin::NAME ),
+			),
+			esc_html__( 'The direction in which the values along the horizontal axis grow.', Visualizer_Plugin::NAME )
+		);
+
+		self::_renderColorPickerItem(
+			esc_html__( 'Base Line Color', Visualizer_Plugin::NAME ),
+			'vAxis[baselineColor]',
+			isset( $this->vAxis['baselineColor'] ) ? $this->vAxis['baselineColor'] : null,
+			'#000'
+		);
 	}
 
 	/**
@@ -126,39 +179,7 @@ abstract class Visualizer_Render_Sidebar_Graph extends Visualizer_Render_Sidebar
 	protected function _renderHorizontalAxisSettings() {
 		self::_renderGroupStart( esc_html__( 'Horizontal Axis Settings', Visualizer_Plugin::NAME ) );
 			self::_renderSectionStart( esc_html__( 'General Settings', Visualizer_Plugin::NAME ), false );
-				self::_renderTextItem(
-					esc_html__( 'Axis Title', Visualizer_Plugin::NAME ),
-					'hAxis[title]',
-					isset( $this->hAxis['title'] ) ? $this->hAxis['title'] : '',
-					esc_html__( 'The title of the horizontal axis.', Visualizer_Plugin::NAME )
-				);
-
-				self::_renderSelectItem(
-					esc_html__( 'Text Position', Visualizer_Plugin::NAME ),
-					'vAxis[textPosition]',
-					isset( $this->vAxis['textPosition'] ) ? $this->vAxis['textPosition'] : '',
-					$this->_positions,
-					esc_html__( 'Position of the horizontal axis text, relative to the chart area.', Visualizer_Plugin::NAME )
-				);
-
-				self::_renderSelectItem(
-					esc_html__( 'Direction', Visualizer_Plugin::NAME ),
-					'hAxis[direction]',
-					isset( $this->hAxis['direction'] ) ? $this->hAxis['direction'] : '',
-					array(
-						''   => '',
-						'1'  => esc_html__( 'Identical Direction', Visualizer_Plugin::NAME ),
-						'-1' => esc_html__( 'Reverse Direction', Visualizer_Plugin::NAME ),
-					),
-					esc_html__( 'The direction in which the values along the horizontal axis grow.', Visualizer_Plugin::NAME )
-				);
-
-				self::_renderColorPickerItem(
-					esc_html__( 'Base Line Color', Visualizer_Plugin::NAME ),
-					'vAxis[baselineColor]',
-					isset( $this->vAxis['baselineColor'] ) ? $this->vAxis['baselineColor'] : null,
-					'#000'
-				);
+				$this->_renderHorizontalAxisGeneratSettings();
 			self::_renderSectionEnd();
 
 			if ( $this->_horizontalGridLines ) {
@@ -218,6 +239,49 @@ abstract class Visualizer_Render_Sidebar_Graph extends Visualizer_Render_Sidebar
 	}
 
 	/**
+	 * Renders general settings block for vertical axis settings.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @access protected
+	 */
+	protected function _renderVerticalAxisGeneralSettings() {
+		self::_renderTextItem(
+			esc_html__( 'Axis Title', Visualizer_Plugin::NAME ),
+			'vAxis[title]',
+			isset( $this->vAxis['title'] ) ? $this->vAxis['title'] : '',
+			esc_html__( 'The title of the vertical axis.', Visualizer_Plugin::NAME )
+		);
+
+		self::_renderSelectItem(
+			esc_html__( 'Text Position', Visualizer_Plugin::NAME ),
+			'hAxis[textPosition]',
+			isset( $this->hAxis['textPosition'] ) ? $this->hAxis['textPosition'] : '',
+			$this->_positions,
+			esc_html__( 'Position of the vertical axis text, relative to the chart area.', Visualizer_Plugin::NAME )
+		);
+
+		self::_renderSelectItem(
+			esc_html__( 'Direction', Visualizer_Plugin::NAME ),
+			'vAxis[direction]',
+			isset( $this->vAxis['direction'] ) ? $this->vAxis['direction'] : '',
+			array(
+				''   => '',
+				'1'  => esc_html__( 'Identical Direction', Visualizer_Plugin::NAME ),
+				'-1' => esc_html__( 'Reverse Direction', Visualizer_Plugin::NAME ),
+			),
+			esc_html__( 'The direction in which the values along the vertical axis grow.', Visualizer_Plugin::NAME )
+		);
+
+		self::_renderColorPickerItem(
+			esc_html__( 'Base Line Color', Visualizer_Plugin::NAME ),
+			'hAxis[baselineColor]',
+			isset( $this->hAxis['baselineColor'] ) ? $this->hAxis['baselineColor'] : null,
+			'#000'
+		);
+	}
+
+	/**
 	 * Renders vertical axis settings.
 	 *
 	 * @since 1.2.0
@@ -227,39 +291,7 @@ abstract class Visualizer_Render_Sidebar_Graph extends Visualizer_Render_Sidebar
 	protected function _renderVerticalAxisSettings() {
 		self::_renderGroupStart( esc_html__( 'Vertical Axis Settings', Visualizer_Plugin::NAME ) );
 			self::_renderSectionStart( esc_html__( 'General Settings', Visualizer_Plugin::NAME ), false );
-				self::_renderTextItem(
-					esc_html__( 'Axis Title', Visualizer_Plugin::NAME ),
-					'vAxis[title]',
-					isset( $this->vAxis['title'] ) ? $this->vAxis['title'] : '',
-					esc_html__( 'The title of the vertical axis.', Visualizer_Plugin::NAME )
-				);
-
-				self::_renderSelectItem(
-					esc_html__( 'Text Position', Visualizer_Plugin::NAME ),
-					'hAxis[textPosition]',
-					isset( $this->hAxis['textPosition'] ) ? $this->hAxis['textPosition'] : '',
-					$this->_positions,
-					esc_html__( 'Position of the vertical axis text, relative to the chart area.', Visualizer_Plugin::NAME )
-				);
-
-				self::_renderSelectItem(
-					esc_html__( 'Direction', Visualizer_Plugin::NAME ),
-					'vAxis[direction]',
-					isset( $this->vAxis['direction'] ) ? $this->vAxis['direction'] : '',
-					array(
-						''   => '',
-						'1'  => esc_html__( 'Identical Direction', Visualizer_Plugin::NAME ),
-						'-1' => esc_html__( 'Reverse Direction', Visualizer_Plugin::NAME ),
-					),
-					esc_html__( 'The direction in which the values along the vertical axis grow.', Visualizer_Plugin::NAME )
-				);
-
-				self::_renderColorPickerItem(
-					esc_html__( 'Base Line Color', Visualizer_Plugin::NAME ),
-					'hAxis[baselineColor]',
-					isset( $this->hAxis['baselineColor'] ) ? $this->hAxis['baselineColor'] : null,
-					'#000'
-				);
+				$this->_renderVerticalAxisGeneralSettings();
 			self::_renderSectionEnd();
 
 			if ( $this->_verticalGridLines ) {

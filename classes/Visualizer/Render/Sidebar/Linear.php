@@ -85,6 +85,63 @@ abstract class Visualizer_Render_Sidebar_Linear extends Visualizer_Render_Sideba
 	}
 
 	/**
+	 * Renders general settings block for horizontal axis settings.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @access protected
+	 */
+	protected function _renderHorizontalAxisGeneratSettings() {
+		parent::_renderHorizontalAxisGeneratSettings();
+
+		self::_renderTextItem(
+			esc_html__( 'Number Format', Visualizer_Plugin::NAME ),
+			'hAxis[format]',
+			isset( $this->hAxis['format'] ) ? $this->hAxis['format'] : '',
+			sprintf(
+				'%s<br><br>%s<br><br>%s',
+				esc_html__( 'Enter custom format pattern to apply to horizontal axis labels.', Visualizer_Plugin::NAME ),
+				sprintf(
+					esc_html__( 'For number axis labels, this is a subset of the decimal formatting %sICU pattern set%s. For instance, $#,###.## will display values $1,234.56 for value 1234.56. Pay attention that if you use #%% percentage format then your values will be multiplied by 100.', Visualizer_Plugin::NAME ),
+					'<a href="http://icu-project.org/apiref/icu4c/classDecimalFormat.html#_details" target="_blank">',
+					'</a>'
+				),
+				sprintf(
+					esc_html__( 'For date axis labels, this is a subset of the date formatting %sICU date and time format%s.', Visualizer_Plugin::NAME ),
+					'<a href="http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax" target="_blank">',
+					'</a>'
+				)
+			)
+		);
+	}
+
+	/**
+	 * Renders general settings block for vertical axis settings.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @access protected
+	 */
+	protected function _renderVerticalAxisGeneralSettings() {
+		parent::_renderVerticalAxisGeneralSettings();
+
+		self::_renderTextItem(
+			esc_html__( 'Number Format', Visualizer_Plugin::NAME ),
+			'vAxis[format]',
+			isset( $this->vAxis['format'] ) ? $this->vAxis['format'] : '',
+			sprintf(
+				'%s<br><br>%s',
+				esc_html__( 'Enter custom format pattern to apply to vertical axis labels.', Visualizer_Plugin::NAME ),
+				sprintf(
+					esc_html__( 'For number axis labels, this is a subset of the decimal formatting %sICU pattern set%s. For instance, $#,###.## will display values $1,234.56 for value 1234.56. Pay attention that if you use #%% percentage format then your values will be multiplied by 100.', Visualizer_Plugin::NAME ),
+					'<a href="http://icu-project.org/apiref/icu4c/classDecimalFormat.html#_details" target="_blank">',
+					'</a>'
+				)
+			)
+		);
+	}
+
+	/**
 	 * Renders line settings items.
 	 *
 	 * @since 1.0.0
@@ -122,6 +179,8 @@ abstract class Visualizer_Render_Sidebar_Linear extends Visualizer_Render_Sideba
 			);
 		}
 
+		echo '<div class="section-delimiter"></div>';
+
 		if ( $this->_includeFocusTarget ) {
 			self::_renderSelectItem(
 				esc_html__( 'Focus Target', Visualizer_Plugin::NAME ),
@@ -135,6 +194,42 @@ abstract class Visualizer_Render_Sidebar_Linear extends Visualizer_Render_Sideba
 				esc_html__( 'The type of the entity that receives focus on mouse hover. Also affects which entity is selected by mouse click.', Visualizer_Plugin::NAME )
 			);
 		}
+
+		self::_renderSelectItem(
+			esc_html__( 'Selection Mode', Visualizer_Plugin::NAME ),
+			'selectionMode',
+			$this->selectionMode,
+			array(
+				''         => '',
+				'single'   => esc_html__( 'Single data point', Visualizer_Plugin::NAME ),
+				'multiple' => esc_html__( 'Multiple data points', Visualizer_Plugin::NAME ),
+			),
+			esc_html__( 'Determines how many data points an user can select on a chart.', Visualizer_Plugin::NAME )
+		);
+
+		self::_renderSelectItem(
+			esc_html__( 'Aggregation Target', Visualizer_Plugin::NAME ),
+			'aggregationTarget',
+			$this->aggregationTarget,
+			array(
+				''         => '',
+				'category' => esc_html__( 'Group selected data by x-value', Visualizer_Plugin::NAME ),
+				'series'   => esc_html__( 'Group selected data by series', Visualizer_Plugin::NAME ),
+				'auto'     => esc_html__( 'Group selected data by x-value if all selections have the same x-value, and by series otherwise', Visualizer_Plugin::NAME ),
+				'none'     => esc_html__( 'Show only one tooltip per selection', Visualizer_Plugin::NAME ),
+			),
+			esc_html__( 'Determines how multiple data selections are rolled up into tooltips. To make it working you need to set multiple selection mode and tooltip trigger to display it when an user selects an element.', Visualizer_Plugin::NAME )
+		);
+
+		echo '<div class="section-delimiter"></div>';
+
+		self::_renderTextItem(
+			esc_html__( 'Point Opacity', Visualizer_Plugin::NAME ),
+			'dataOpacity',
+			$this->dataOpacity,
+			esc_html__( 'The transparency of data points, with 1.0 being completely opaque and 0.0 fully transparent.', Visualizer_Plugin::NAME ),
+			'1.0'
+		);
 	}
 
 	/**
