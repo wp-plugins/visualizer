@@ -91,11 +91,15 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 			$chart = $this->_chart;
 		}
 
+		$type = get_post_meta( $chart->ID, Visualizer_Plugin::CF_CHART_TYPE, true );
+		$series = apply_filters( Visualizer_Plugin::FILTER_GET_CHART_SERIES, get_post_meta( $chart->ID, Visualizer_Plugin::CF_SERIES, true ), $chart->ID, $type );
+		$data = apply_filters( Visualizer_Plugin::FILTER_GET_CHART_DATA, unserialize( $chart->post_content ), $chart->ID, $type );
+
 		return array(
-			'type'     => get_post_meta( $chart->ID, Visualizer_Plugin::CF_CHART_TYPE, true ),
-			'series'   => get_post_meta( $chart->ID, Visualizer_Plugin::CF_SERIES, true ),
+			'type'     => $type,
+			'series'   => $series,
 			'settings' => get_post_meta( $chart->ID, Visualizer_Plugin::CF_SETTINGS, true ),
-			'data'     => unserialize( $chart->post_content ),
+			'data'     => $data,
 		);
 	}
 
@@ -161,7 +165,7 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 		$input_method = $is_post ? INPUT_POST : INPUT_GET;
 
 		$chart_id = $success = false;
-		$nonce = Visualizer_Security::verifyNonce( filter_input( $input_method, 'nonce' ) );
+		$nonce = wp_verify_nonce( filter_input( $input_method, 'nonce' ) );
 		$capable = current_user_can( 'delete_posts' );
 		if ( $nonce && $capable ) {
 			$chart_id = filter_input( $input_method, 'chart', FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) );
@@ -192,6 +196,8 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 	 * @access public
 	 */
 	public function renderChartPages() {
+		define ( 'IFRAME_REQUEST', 1 );
+
 		// check chart, if chart not exists, will create new one and redirects to the same page with proper chart id
 		$chart_id = filter_input( INPUT_GET, 'chart', FILTER_VALIDATE_INT );
 		if ( !$chart_id || !( $chart = get_post( $chart_id ) ) || $chart->post_type != Visualizer_Plugin::CPT_VISUALIZER ) {
@@ -255,7 +261,7 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 	 */
 	private function _handleTypesPage() {
 		// process post request
-		if ( $_SERVER['REQUEST_METHOD'] == 'POST' && Visualizer_Security::verifyNonce( filter_input( INPUT_POST, 'nonce' ) ) ) {
+		if ( $_SERVER['REQUEST_METHOD'] == 'POST' && wp_verify_nonce( filter_input( INPUT_POST, 'nonce' ) ) ) {
 			$type = filter_input( INPUT_POST, 'type' );
 			if ( in_array( $type, Visualizer_Plugin::getChartTypes() ) ) {
 				// save new chart type
@@ -308,6 +314,10 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 		wp_enqueue_style( 'visualizer-frame' );
 		wp_enqueue_script( 'visualizer-render' );
 		wp_localize_script( 'visualizer-render', 'visualizer', array(
+			'l10n'   => array(
+				'remotecsv_prompt' => esc_html__( 'Please, enter the URL of CSV file:', Visualizer_Plugin::NAME ),
+				'invalid_source'   => esc_html__( 'You have entered invalid URL. Please, insert proper URL.', Visualizer_Plugin::NAME ),
+			),
 			'charts' => array(
 				'canvas' => $data,
 			),
@@ -324,7 +334,7 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 	 * @access private
 	 */
 	private function _handleSettingsPage() {
-		if ( $_SERVER['REQUEST_METHOD'] == 'POST' && Visualizer_Security::verifyNonce( filter_input( INPUT_GET, 'nonce' ) ) ) {
+		if ( $_SERVER['REQUEST_METHOD'] == 'POST' && wp_verify_nonce( filter_input( INPUT_GET, 'nonce' ) ) ) {
 			if ( $this->_chart->post_status == 'auto-draft' ) {
 				$this->_chart->post_status = 'publish';
 				wp_update_post( $this->_chart->to_array() );
@@ -384,7 +394,7 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 	 */
 	public function uploadData() {
 		// validate nonce
-		if ( !Visualizer_Security::verifyNonce( filter_input( INPUT_GET, 'nonce' ) ) ) {
+		if ( !wp_verify_nonce( filter_input( INPUT_GET, 'nonce' ) ) ) {
 			status_header( 403 );
 			exit;
 		}
@@ -396,11 +406,17 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 			exit;
 		}
 
+		$source = null;
 		$render = new Visualizer_Render_Page_Update();
-		if ( !isset( $_FILES['data'] ) || $_FILES['data']['error'] != 0 ) {
+		if ( filter_input( INPUT_POST, 'remote_data', FILTER_VALIDATE_URL ) ) {
+			$source =  new Visualizer_Source_Csv_Remote( $_POST['remote_data'] );
+		} elseif ( isset( $_FILES['local_data'] ) && $_FILES['local_data']['error'] == 0 ) {
+			$source =  new Visualizer_Source_Csv( $_FILES['local_data']['tmp_name'] );
+		} else  {
 			$render->message = esc_html__( "CSV file with chart data was not uploaded. Please, try again.", Visualizer_Plugin::NAME );
-		} else {
-			$source = new Visualizer_Source_Csv( $_FILES['data']['tmp_name'] );
+		}
+
+		if ( $source ) {
 			if ( $source->fetch() ) {
 				$chart->post_content = $source->getData();
 				wp_update_post( $chart->to_array() );
@@ -409,10 +425,10 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 				update_post_meta( $chart->ID, Visualizer_Plugin::CF_SOURCE, $source->getSourceName() );
 				update_post_meta( $chart->ID, Visualizer_Plugin::CF_DEFAULT_DATA, 0 );
 
-				$render->data = $source->getData();
-				$render->series = $source->getSeries();
+				$render->data = json_encode( $source->getRawData() );
+				$render->series = json_encode( $source->getSeries() );
 			} else {
-				$render->message = esc_html__( "CSV file is broken or incorrect. Please, try again.", Visualizer_Plugin::NAME );
+				$render->message = esc_html__( "CSV file is broken or invalid. Please, try again.", Visualizer_Plugin::NAME );
 			}
 		}
 
@@ -429,7 +445,7 @@ class Visualizer_Module_Chart extends Visualizer_Module {
 	 */
 	public function cloneChart() {
 		$chart_id = $success = false;
-		$nonce = Visualizer_Security::verifyNonce( filter_input( INPUT_GET, 'nonce' ), Visualizer_Plugin::ACTION_CLONE_CHART );
+		$nonce = wp_verify_nonce( filter_input( INPUT_GET, 'nonce' ), Visualizer_Plugin::ACTION_CLONE_CHART );
 		$capable = current_user_can( 'edit_posts' );
 		if ( $nonce && $capable ) {
 			$chart_id = filter_input( INPUT_GET, 'chart', FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) );
