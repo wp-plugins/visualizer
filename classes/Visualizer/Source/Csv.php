@@ -62,23 +62,23 @@ class Visualizer_Source_Csv extends Visualizer_Source {
 	 */
 	private function _fetchSeries( &$handle ) {
 		// read column titles
-		$labels = fgetcsv( $handle );
-
+		$labels = fgetcsv( $handle, 0, VISUALIZER_CSV_DELIMITER, VISUALIZER_CSV_ENCLOSURE, VISUALIZER_CSV_ESCAPRE );
 		// read series types
-		$types = fgetcsv( $handle );
+		$types = fgetcsv( $handle, 0, VISUALIZER_CSV_DELIMITER, VISUALIZER_CSV_ENCLOSURE, VISUALIZER_CSV_ESCAPRE );
 
 		if ( !$labels || !$types ) {
 			return false;
 		}
 
 		// if no types were setup, re read labels and empty types array
+		$types = array_map( 'trim', $types );
 		if ( !self::_validateTypes( $types ) ) {
 			// re open the file
 			fclose( $handle );
 			$handle = fopen( $this->_filename, 'rb' );
 
 			// re read the labels and empty types array
-			$labels = fgetcsv( $handle );
+			$labels = fgetcsv( $handle, 0, VISUALIZER_CSV_DELIMITER, VISUALIZER_CSV_ENCLOSURE, VISUALIZER_CSV_ESCAPRE );
 			$types = array();
 		}
 
@@ -119,7 +119,7 @@ class Visualizer_Source_Csv extends Visualizer_Source {
 			}
 
 			// fetch data
-			while ( ( $data = fgetcsv( $handle ) ) !== false ) {
+			while ( ( $data = fgetcsv( $handle, 0, VISUALIZER_CSV_DELIMITER, VISUALIZER_CSV_ENCLOSURE, VISUALIZER_CSV_ESCAPRE ) ) !== false ) {
 				$this->_data[] = $this->_normalizeData( $data );
 			}
 

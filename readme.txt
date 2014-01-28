@@ -3,8 +3,8 @@ Contributors: madpixels, straightforward
 Donate link: http://goo.gl/hN9FYf
 Tags: chart, charts, charting, graph, graphs, graphing, visualisation, visualise data, visualization, visualize data, HTML5, canvas, pie chart, line chart, bar chart, column chart, gauge chart, area chart, scatter chart, candlestick chart, geo chart, google visualization api
 Requires at least: 3.5
-Tested up to: 3.8
-Stable tag: 1.4
+Tested up to: 3.8.1
+Stable tag: 1.4.1
 License: GPL v2.0 or later
 License URI: http://www.opensource.org/licenses/gpl-license.php
 
@@ -57,6 +57,12 @@ Pay attention that to turn your shortcodes into graphs, your theme has to have `
 5. Charts library
 
 == Changelog ==
+
+= 1.4.1 =
+* Fixed issue which prevents the plugin working on SSL backend
+* Fixed issue with CSV file uploading in IE and other browsers
+* Fixed issue with empty series, which appears due to leading space in a source file
+* Added ability to define custom delimiter, enclosure and escape variables for CSV parsing
 
 = 1.4 =
 * Implemented aggregation target and selection mode options for candlestick chart
