@@ -1,10 +1,10 @@
 === Visualizer ===
 Contributors: madpixels, straightforward
-Donate link: http://goo.gl/hN9FYf
+Donate link: http://flattr.com/thing/2574985/WordPress-Visualizer
 Tags: chart, charts, charting, graph, graphs, graphing, visualisation, visualise data, visualization, visualize data, HTML5, canvas, pie chart, line chart, bar chart, column chart, gauge chart, area chart, scatter chart, candlestick chart, geo chart, google visualization api
 Requires at least: 3.5
 Tested up to: 3.8.1
-Stable tag: 1.4.1.1
+Stable tag: 1.4.2
 License: GPL v2.0 or later
 License URI: http://www.opensource.org/licenses/gpl-license.php
 
@@ -57,6 +57,11 @@ Pay attention that to turn your shortcodes into graphs, your theme has to have `
 5. Charts library
 
 == Changelog ==
+
+= 1.4.2 =
+* Fixed remote CSV uploading issue when allow_url_fopen option is disabled in php.ini
+* Replaced flattr image on widget and added donate link to plugin meta data
+* Added notification message at library page when allow_url_fopen option is disabled
 
 = 1.4.1.1 =
 * Removed CSV parser escape constant to prevent warnings which appears when PHP 5.2.x or less is used

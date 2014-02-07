@@ -31,6 +31,16 @@
 class Visualizer_Source_Csv_Remote extends Visualizer_Source_Csv {
 
 	/**
+	 * Temporary file name used when allow_url_fopen option is disabled.
+	 *
+	 * @since 1.4.2
+	 *
+	 * @access private
+	 * @var string
+	 */
+	private $_tmpfile = false;
+
+	/**
 	 * Returns data parsed from source.
 	 *
 	 * @since 1.1.0
@@ -113,6 +123,37 @@ class Visualizer_Source_Csv_Remote extends Visualizer_Source_Csv {
 	 */
 	public function getSourceName() {
 		return __CLASS__;
+	}
+
+	/**
+	 * Returns file handle to fetch data from.
+	 *
+	 * @since 1.4.2
+	 *
+	 * @access protected
+	 * @staticvar boolean $allow_url_fopen Determines whether or not allow_url_fopen option is enabled.
+	 * @param string $filename Optional file name to get handle. If omitted, $_filename is used.
+	 * @return resource File handle resource on success, otherwise FALSE.
+	 */
+	protected function _get_file_handle( $filename = false ) {
+		static $allow_url_fopen = null;
+
+		if ( $this->_tmpfile && is_readable( $this->_tmpfile ) ) {
+			return parent::_get_file_handle( $this->_tmpfile );
+		}
+
+		if ( is_null( $allow_url_fopen ) ) {
+			$allow_url_fopen = filter_var( ini_get( 'allow_url_fopen' ), FILTER_VALIDATE_BOOLEAN );
+		}
+
+		$scheme = parse_url( $this->_filename, PHP_URL_SCHEME );
+		if ( $allow_url_fopen && in_array( $scheme, stream_get_wrappers() ) ) {
+			return parent::_get_file_handle( $filename );
+		}
+
+		$this->_tmpfile = download_url( $this->_filename );
+
+		return !is_wp_error( $this->_tmpfile ) ? parent::_get_file_handle( $this->_tmpfile ) : false;
 	}
 
 }

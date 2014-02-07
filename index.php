@@ -3,9 +3,10 @@
 Plugin Name: WordPress Visualizer
 Plugin URI: https://github.com/madpixelslabs/visualizer
 Description: A simple, easy to use and quite powerful tool to create, manage and embed interactive charts into your WordPress posts and pages. The plugin uses Google Visualization API to render charts, which supports cross-browser compatibility (adopting VML for older IE versions) and cross-platform portability to iOS and new Android releases.
-Version: 1.4.1.1
+Version: 1.4.2
 Author: Madpixels
 Author URI: http://madpixels.net
+Donate link: http://flattr.com/thing/2574985/WordPress-Visualizer
 License: GPL v2.0 or later
 License URI: http://www.opensource.org/licenses/gpl-license.php
 */
