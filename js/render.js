@@ -4,7 +4,7 @@
 	v.objects = {};
 
 	v.renderChart = function(id) {
-		var chart, render, container, series, data, table, settings, i, j, row, date;
+		var chart, render, container, series, data, table, settings, i, j, row, date, axis, property, format, formatter;
 
 		chart = v.charts[id];
 		series = chart.series;
@@ -58,6 +58,36 @@
 				return;
 		}
 
+		if (series[0] && (series[0].type == 'date' || series[0].type == 'datetime')) {
+			axis = false;
+			switch (v.charts[id].type) {
+				case 'line':
+				case 'area':
+				case 'scatter':
+				case 'candlestick':
+				case 'column':
+					axis = settings.hAxis;
+					break;
+				case 'bar':
+					axis = settings.vAxis;
+					break;
+			}
+
+			if (axis) {
+				for (property in axis.viewWindow) {
+					date = new Date(axis.viewWindow[property]);
+					if (Object.prototype.toString.call(date) === "[object Date]") {
+						if (!isNaN(date.getTime())) {
+							axis.viewWindow[property] = date;
+							continue;
+						}
+					}
+
+					delete axis.viewWindow[property];
+				}
+			}
+		}
+
         for (i = 0; i < data.length; i++) {
 			row = [];
 			for (j = 0; j < series.length; j++) {
@@ -74,6 +104,31 @@
 			}
 			table.addRow(row);
         }
+
+		if (settings.series) {
+			for (i = 0; i < settings.series.length; i++) {
+				format = settings.series[i].format;
+				if (!format || format == '') {
+					continue;
+				}
+
+				formatter = null;
+				switch (series[i + 1].type) {
+					case 'number':
+						formatter = new g.visualization.NumberFormat({pattern: format});
+						break;
+					case 'date':
+					case 'datetime':
+					case 'timeofday':
+						formatter = new g.visualization.DateFormat({pattern: format});
+						break;
+				}
+
+				if (formatter) {
+					formatter.format(table, i + 1);
+				}
+			}
+		}
 
         render.draw(table, settings);
 	};

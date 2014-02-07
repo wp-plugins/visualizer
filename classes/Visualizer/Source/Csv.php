@@ -21,7 +21,7 @@
 // +----------------------------------------------------------------------+
 
 /**
- * Source manager for CSV files.
+ * Source manager for local CSV files.
  *
  * @category Visualizer
  * @package Source
@@ -35,10 +35,10 @@ class Visualizer_Source_Csv extends Visualizer_Source {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @access private
+	 * @access protected
 	 * @var string
 	 */
-	private $_filename;
+	protected $_filename;
 
 	/**
 	 * Constructor.
@@ -48,8 +48,8 @@ class Visualizer_Source_Csv extends Visualizer_Source {
 	 * @access public
 	 * @param string $filename The path to the file.
 	 */
-	public function __construct( $filename ) {
-		$this->_filename = $filename;
+	public function __construct( $filename = null ) {
+		$this->_filename = trim( $filename );
 	}
 
 	/**
@@ -60,25 +60,53 @@ class Visualizer_Source_Csv extends Visualizer_Source {
 	 * @access private
 	 * @param resource $handle The file handle resource.
 	 */
-	private function _fetchSeries( $handle ) {
+	private function _fetchSeries( &$handle ) {
 		// read column titles
-		$labels = fgetcsv( $handle );
-
+		$labels = fgetcsv( $handle, 0, VISUALIZER_CSV_DELIMITER, VISUALIZER_CSV_ENCLOSURE );
 		// read series types
-		$types = fgetcsv( $handle );
+		$types = fgetcsv( $handle, 0, VISUALIZER_CSV_DELIMITER, VISUALIZER_CSV_ENCLOSURE );
 
 		if ( !$labels || !$types ) {
 			return false;
 		}
 
+		// if no types were setup, re read labels and empty types array
+		$types = array_map( 'trim', $types );
+		if ( !self::_validateTypes( $types ) ) {
+			// re open the file
+			fclose( $handle );
+			$handle = $this->_get_file_handle();
+
+			// re read the labels and empty types array
+			$labels = fgetcsv( $handle, 0, VISUALIZER_CSV_DELIMITER, VISUALIZER_CSV_ENCLOSURE );
+			$types = array();
+		}
+
 		for ( $i = 0, $len = count( $labels ); $i < $len; $i++ ) {
+			$default_type = $i == 0 ? 'string' : 'number';
 			$this->_series[] = array(
 				'label' => $labels[$i],
-				'type'  => isset( $types[$i] ) ? $types[$i] : 'string',
+				'type'  => isset( $types[$i] ) ? $types[$i] : $default_type,
 			);
 		}
 
 		return true;
+	}
+
+	/**
+	 * Returns file handle to fetch data from.
+	 *
+	 * @since 1.4.2
+	 *
+	 * @access protected
+	 * @param string $filename Optional file name to get handle. If omitted, $_filename is used.
+	 * @return resource File handle resource on success, otherwise FALSE.
+	 */
+	protected function _get_file_handle( $filename = false ) {
+		// set line endings auto detect mode
+		@ini_set( 'auto_detect_line_endings', true );
+		// open file and return handle
+		return fopen( $filename ? $filename : $this->_filename, 'rb' );
 	}
 
 	/**
@@ -90,11 +118,13 @@ class Visualizer_Source_Csv extends Visualizer_Source {
 	 * @return boolean TRUE on success, otherwise FALSE.
 	 */
 	public function fetch() {
-		// set line endings auto detect mode
-		@ini_set( 'auto_detect_line_endings', true );
+		// if filename is empty return false
+		if ( empty( $this->_filename ) ) {
+			return false;
+		}
 
 		// read file and fill arrays
-		$handle = fopen( $this->_filename, 'rb' );
+		$handle = $this->_get_file_handle();
 		if ( $handle ) {
 			// fetch series
 			if ( !$this->_fetchSeries( $handle ) ) {
@@ -102,7 +132,7 @@ class Visualizer_Source_Csv extends Visualizer_Source {
 			}
 
 			// fetch data
-			while ( ( $data = fgetcsv( $handle ) ) !== false ) {
+			while ( ( $data = fgetcsv( $handle, 0, VISUALIZER_CSV_DELIMITER, VISUALIZER_CSV_ENCLOSURE ) ) !== false ) {
 				$this->_data[] = $this->_normalizeData( $data );
 			}
 
