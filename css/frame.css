@@ -6,6 +6,7 @@
 	left: 0;
 	z-index: 75;
 	overflow: auto;
+	background-color: white;
 }
 
 #canvas {
@@ -246,6 +247,32 @@ div.group-content .group-description {
 	margin: 0;
 }
 
+#rate-the-plugin {
+	margin-top: 40px;
+	padding: 20px;
+	border-top: 1px dashed #ddd;
+}
+
+#rate-stars {
+	float: right;
+	width: 100px;
+	height: 20px;
+	background-image: url('../images/star.png');
+	background-repeat: repeat-x;
+	background-position: right center;
+}
+
+#rate-link {
+	text-decoration: none;
+	display: block;
+	margin-top: 3px;
+}
+
+#flattr {
+	margin-top: 15px;
+	text-align: center;
+}
+
 /******************************************************************************/
 /********************************  TOOLBAR  ***********************************/
 /******************************************************************************/
@@ -380,15 +407,20 @@ div.group-content .group-description {
 
 .file-wrapper {
 	position: relative;
+	overflow: hidden;
 }
 
 .file {
+	font-size: 200px;
     position: absolute;
     top: 0;
-	left: 0;
 	right: 0;
-	bottom: 0;
     opacity: 0;
     -moz-opacity: 0;
     filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0);
+}
+
+#remote-file {
+	margin-top: 10px;
+	clear: both;
 }
