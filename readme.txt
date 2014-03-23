@@ -1,10 +1,10 @@
 === Visualizer ===
 Contributors: madpixels, straightforward
-Donate link:
+Donate link: http://flattr.com/thing/2574985/WordPress-Visualizer
 Tags: chart, charts, charting, graph, graphs, graphing, visualisation, visualise data, visualization, visualize data, HTML5, canvas, pie chart, line chart, bar chart, column chart, gauge chart, area chart, scatter chart, candlestick chart, geo chart, google visualization api
 Requires at least: 3.5
-Tested up to: 3.5.2
-Stable tag: 1.0.0
+Tested up to: 3.8.1
+Stable tag: 1.4.2.2
 License: GPL v2.0 or later
 License URI: http://www.opensource.org/licenses/gpl-license.php
 
@@ -27,28 +27,111 @@ Charts are rendered using HTML5/SVG technology to provide cross-browser compatib
 
 *above descriptions were partially taken from Google Visualization API site*
 
+### Knowledge Base ###
+
+1. [How can I create a chart?](https://github.com/madpixelslabs/visualizer/wiki/How-can-I-create-a-chart%3F)
+1. [How can I edit a chart?](https://github.com/madpixelslabs/visualizer/wiki/How-can-I-edit-a-chart%3F)
+1. [How can I clone a chart?](https://github.com/madpixelslabs/visualizer/wiki/How-can-I-clone-a-chart%3F)
+1. [How can I delete a chart?](https://github.com/madpixelslabs/visualizer/wiki/How-can-I-delete-a-chart%3F)
+1. [How can I highlight a single bar?](https://github.com/madpixelslabs/visualizer/wiki/How-can-I-highlight-a-single-bar%3F)
+1. [How can I populate chart series and data dynamically?](https://github.com/madpixelslabs/visualizer/wiki/How-can-I-populate-chart-series-and-data-dynamically%3F)
+1. [How can I populate data from Google Spreadsheet?](https://github.com/madpixelslabs/visualizer/wiki/How-can-I-populate-data-from-Google-Spreadsheet%3F)
+
 == Installation ==
 
 1. Upload the files to the `/wp-content/plugins/visualizer/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 
+== Frequently Asked Questions ==
+
+= Shortcode does not turn into graph =
+
+Pay attention that to turn your shortcodes into graphs, your theme has to have `<?php wp_footer(); ?>` call at the bottom of **footer.php** file.
+
+== Screenshots ==
+
+1. Chart type selection
+2. Chart data uploading
+3. Chart options editing
+4. Charts media library
+5. Charts library
+
 == Changelog ==
+
+= 1.4.2.2 =
+* Added ability to pass a class for chart wrapper div
+* Added proper label for custom post type
+
+= 1.4.2.1 =
+* Fixed issue with download_url function which not exists at front end
+* Added functionality which prevents direct access to the plugin folder
+
+= 1.4.2 =
+* Fixed remote CSV uploading issue when allow_url_fopen option is disabled in php.ini
+* Replaced flattr image on widget and added donate link to plugin meta data
+* Added notification message at library page when allow_url_fopen option is disabled
+
+= 1.4.1.1 =
+* Removed CSV parser escape constant to prevent warnings which appears when PHP 5.2.x or less is used
+
+= 1.4.1 =
+* Fixed issue which prevents the plugin working on SSL backend
+* Fixed issue with CSV file uploading in IE and other browsers
+* Fixed issue with empty series, which appears due to leading space in a source file
+* Added ability to define custom delimiter, enclosure and escape variables for CSV parsing
+
+= 1.4 =
+* Implemented aggregation target and selection mode options for candlestick chart
+* Implemented focus target and data opacity for columnar chars
+* Implemented data opacity and interpolate nulls settings for line chart
+* Implemented ability to edit tooltip settings
+* Implemented new settings for linear charts like selection mode and aggregation target
+* Implemented area and point opacity settings for area chart
+* Implemented new settings for pie chart like pie hole, start angle and slice offset
+* Implemented ability to select a color for chart title and legend items
+* Fixed number formatting settings for linear charts, from now it works only for axis labels
+* Reworked general settings section by moving title and font settings into separate groups
+
+= 1.3.0.2 =
+* Replaced links to github wiki
+
+= 1.3.0.1 =
+* Added Flattr button
+
+= 1.3.0 =
+* Implemented ability to set number and date formatters
+* Implemented ability to select transparent background for a chart
+* Fixed JS bugs which appear when post type editor support is disabled
+* Fixed issue with NULL values for numeric series
+* Fixed invalid charts rendering at "Add Media" library
+* Fixed compatibility issue with another Google API related plugins
+* Added "rate the plugin" box
+
+= 1.2.0 =
+* Implemented minor grid lines settings.
+* Implemented view window settings.
+* Horizontal and vertical axes settings were split into separate groups.
+
+= 1.1.4 =
+* Bug with float values has been fixed.
+
+= 1.1.3 =
+* Issue with "fseek warning" for Google Spreadsheet document source, was fixed.
+
+= 1.1.2 =
+* Compatibility issues with WordPress version 3.6 has been fixed.
+
+= 1.1.1 =
+* Active type tab in the charts library was fixed.
+* Library styles were updated.
+
+= 1.1.0 =
+* Auto population was added for remote CSV file source.
+* Ability to hook chart series and data was implemented.
+* Ability to upload CSV files from web was implemented.
+
+= 1.0.1 =
+* The bug with CSV file uploading was fixed.
 
 = 1.0.0 =
 * The first version of the plugin was implemented.
-
-== Usage ==
-
-The plugin is very simple in use. To create a chart you just need to complete three steps wizard, which walks you through chart type selection, data uploading and settings configuration screens.
-
-= Create Chart  =
-
-1. Create or edit existing post/page;
-1. Click on "Add Media" button above post/page content editor;
-1. Go to "Visualizations" menu item at left sidebar;
-1. Click on "Create New" at the top of popup, below "Visualization" title;
-1. Chart type selection sheet appears. Select a chart type and click on "Next" button at the right bottom corner;
-1. Data uploading screen appears. Expand "Upload CSV file" section at right sidebar. Upload your CSV file. You can find a link on a sample in the text above "Upload CSV file" button;
-1. After you've uploaded your csv file, click on "Next" button and go to settings screen;
-1. At this screen you can configure appropriate settings and change a look of your chart;
-1. When you have finished, click on "Insert Chart" button and save your post/page. That's all, your chart will appear at front end.

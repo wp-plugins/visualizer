@@ -21,21 +21,31 @@
 // +----------------------------------------------------------------------+
 
 /**
- * General module what setups all required environment.
+ * Sources module class.
  *
  * @category Visualizer
  * @package Module
  *
- * @since 1.0.0
+ * @since 1.1.0
  */
-class Visualizer_Module_Setup extends Visualizer_Module {
+class Visualizer_Module_Sources extends Visualizer_Module {
 
 	const NAME = __CLASS__;
 
 	/**
+	 * The array of fetched sources.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @access private
+	 * @var array
+	 */
+	private $_sources = array();
+
+	/**
 	 * Constructor.
 	 *
-	 * @since 1.0.0
+	 * @since 1.1.0
 	 *
 	 * @access public
 	 * @param Visualizer_Plugin $plugin The instance of the plugin.
@@ -43,35 +53,68 @@ class Visualizer_Module_Setup extends Visualizer_Module {
 	public function __construct( Visualizer_Plugin $plugin ) {
 		parent::__construct( $plugin );
 
-		$this->_addAction( 'init', 'setupCustomPostTypes' );
-		$this->_addAction( 'plugins_loaded', 'loadTextDomain' );
+		$this->_addFilter( Visualizer_Plugin::FILTER_GET_CHART_SERIES, 'filterChartSeries', 1, 2 );
+		$this->_addFilter( Visualizer_Plugin::FILTER_GET_CHART_DATA, 'filterChartData', 1, 2 );
 	}
 
 	/**
-	 * Registers custom post type for charts.
+	 * Returns appropriate source object for a chart.
 	 *
-	 * @since 1.0.0
-	 * @uses register_post_type() To register custom post type for charts.
+	 * @since 1.1.0
 	 *
-	 * @access public
+	 * @access private
+	 * @param int $chart_id The chart id.
+	 * @return Visualizer_Source The source object if source exists, otherwise FALSE.
 	 */
-	public function setupCustomPostTypes() {
-		register_post_type( Visualizer_Plugin::CPT_VISUALIZER, array(
-			'label'  => 'Visualizer Chart',
-			'public' => false,
-		) );
+	private function _getSource( $chart_id ) {
+		if ( !isset( $this->_sources[$chart_id] ) ) {
+			$class = get_post_meta( $chart_id, Visualizer_Plugin::CF_SOURCE, true );
+			if ( !class_exists( $class, true ) ) {
+				return false;
+			}
+
+			$this->_sources[$chart_id] = new $class();
+		}
+
+		return $this->_sources[$chart_id];
 	}
 
 	/**
-	 * Loads plugin text domain translations.
+	 * Filters chart sereis.
 	 *
-	 * @since 1.0.0
-	 * @uses load_plugin_textdomain() To load translations for the plugin.
+	 * @since 1.1.0
 	 *
 	 * @access public
+	 * @param array $series The array of chart series.
+	 * @param int $chart_id The chart id.
+	 * @return array The array of filtered series.
 	 */
-	public function loadTextDomain() {
-		load_plugin_textdomain( Visualizer_Plugin::NAME, false, dirname( plugin_basename( VISUALIZER_BASEFILE ) ) . '/languages/' );
+	public function filterChartSeries( $series, $chart_id ) {
+		$source = $this->_getSource( $chart_id );
+		if ( !$source ) {
+			return $series;
+		}
+
+		return $source->repopulateSeries( $series, $chart_id );
+	}
+
+	/**
+	 * Filters chart data.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @access public
+	 * @param array $data The array of chart data.
+	 * @param int $chart_id The chart id.
+	 * @return array The array of filtered data.
+	 */
+	public function filterChartData( $data, $chart_id ) {
+		$source = $this->_getSource( $chart_id );
+		if ( !$source ) {
+			return $data;
+		}
+
+		return $source->repopulateData( $data, $chart_id );
 	}
 
 }

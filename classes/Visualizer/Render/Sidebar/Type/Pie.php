@@ -87,6 +87,22 @@ class Visualizer_Render_Sidebar_Type_Pie extends Visualizer_Render_Sidebar {
 					esc_html__( 'The content of the text displayed on the slice.', Visualizer_Plugin::NAME )
 				);
 
+				self::_renderTextItem(
+					esc_html__( 'Pie Hole', Visualizer_Plugin::NAME ),
+					'pieHole',
+					$this->pieHole,
+					esc_html__( 'If between 0 and 1, displays a donut chart. The hole with have a radius equal to number times the radius of the chart. Only applicable when the chart is two-dimensional.', Visualizer_Plugin::NAME ),
+					'0.0'
+				);
+
+				self::_renderTextItem(
+					esc_html__( 'Start Angle', Visualizer_Plugin::NAME ),
+					'pieStartAngle',
+					$this->pieStartAngle,
+					esc_html__( 'The angle, in degrees, to rotate the chart by. The default of 0 will orient the leftmost edge of the first slice directly up.', Visualizer_Plugin::NAME ),
+					0
+				);
+
 				self::_renderColorPickerItem(
 					esc_html__( 'Slice Border Color', Visualizer_Plugin::NAME ),
 					'pieSliceBorderColor',
@@ -141,18 +157,50 @@ class Visualizer_Render_Sidebar_Type_Pie extends Visualizer_Render_Sidebar {
 	 * @access protected
 	 */
 	protected function _renderSlicesSettings() {
-		self::_renderGroupStart( esc_html__( 'Slices Colors', Visualizer_Plugin::NAME ) );
-			self::_renderSectionStart();
-				for ( $i = 0, $cnt = count( $this->__data ); $i < $cnt; $i++ ) {
+		self::_renderGroupStart( esc_html__( 'Slices Settings', Visualizer_Plugin::NAME ) );
+			for ( $i = 0, $cnt = count( $this->__data ); $i < $cnt; $i++ ) {
+				self::_renderSectionStart( esc_html( $this->__data[$i][0] ), false );
+					self::_renderTextItem(
+						esc_html__( 'Slice Offset', Visualizer_Plugin::NAME ),
+						'slices[' . $i . '][offset]',
+						isset( $this->slices[$i]['color'] ) ? $this->slices[$i]['color'] : null,
+						esc_html__( "How far to separate the slice from the rest of the pie, from 0.0 (not at all) to 1.0 (the pie's radius).", Visualizer_Plugin::NAME ),
+						'0.0'
+					);
+
 					self::_renderColorPickerItem(
-						$this->__data[$i][0],
+						esc_html__( 'Slice Color', Visualizer_Plugin::NAME ),
 						'slices[' . $i . '][color]',
 						isset( $this->slices[$i]['color'] ) ? $this->slices[$i]['color'] : null,
 						null
 					);
-				}
-			self::_renderSectionEnd();
+				self::_renderSectionEnd();
+			}
 		self::_renderGroupEnd();
+	}
+
+	/**
+	 * Renders tooltip settings section.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @access protected
+	 */
+	protected function _renderTooltipSettigns() {
+		parent::_renderTooltipSettigns();
+
+		self::_renderSelectItem(
+			esc_html__( 'Text', Visualizer_Plugin::NAME ),
+			'tooltip[text]',
+			isset( $this->tooltip['text'] ) ? $this->tooltip['text'] : null,
+			array(
+				''           => '',
+				'both'       => esc_html__( 'Display both the absolute value of the slice and the percentage of the whole', Visualizer_Plugin::NAME ),
+				'value'      => esc_html__( 'Display only the absolute value of the slice', Visualizer_Plugin::NAME ),
+				'percentage' => esc_html__( 'Display only the percentage of the whole represented by the slice', Visualizer_Plugin::NAME ),
+			),
+			esc_html__( 'Determines what information to display when the user hovers over a pie slice.', Visualizer_Plugin::NAME )
+		);
 	}
 
 }
