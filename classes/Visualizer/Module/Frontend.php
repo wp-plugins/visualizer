@@ -57,8 +57,15 @@ class Visualizer_Module_Frontend extends Visualizer_Module {
 		$this->_addAction( 'wp_enqueue_scripts', 'enqueueScripts' );
 		$this->_addShortcode( 'visualizer', 'renderChart' );
 
-		add_filter( 'widget_text', 'do_shortcode' );
-		add_filter( 'term_description', 'do_shortcode' );
+		// add do_shortocde hook for widget_text filter
+		if ( !has_filter( 'widget_text', 'do_shortcode' ) ) {
+			add_filter( 'widget_text', 'do_shortcode' );
+		}
+
+		// add do_shortcode hook for term_description filter
+		if ( !has_filter( 'term_description', 'do_shortcode' ) ) {
+			add_filter( 'term_description', 'do_shortcode' );
+		}
 	}
 
 	/**
@@ -70,8 +77,8 @@ class Visualizer_Module_Frontend extends Visualizer_Module {
 	 * @access public
 	 */
 	public function enqueueScripts() {
-		wp_register_script( 'google-jsapi', '//www.google.com/jsapi', array(), null, true );
-		wp_register_script( 'visualizer-render', VISUALIZER_ABSURL . 'js/render.js', array( 'google-jsapi', 'jquery' ), Visualizer_Plugin::VERSION, true );
+		wp_register_script( 'visualizer-google-jsapi', '//www.google.com/jsapi', array(), null, true );
+		wp_register_script( 'visualizer-render', VISUALIZER_ABSURL . 'js/render.js', array( 'visualizer-google-jsapi', 'jquery' ), Visualizer_Plugin::VERSION, true );
 	}
 
 	/**
@@ -90,6 +97,7 @@ class Visualizer_Module_Frontend extends Visualizer_Module {
 	public function renderChart( $atts ) {
 		$atts = shortcode_atts( array(
 			'id'     => false, // chart id
+			'class'  => false, // chart class
 			'series' => false, // series filter hook
 			'data'   => false, // data filter hook
 		), $atts );
@@ -100,6 +108,9 @@ class Visualizer_Module_Frontend extends Visualizer_Module {
 		}
 
 		$id = 'visualizer-' . $atts['id'];
+		$class = apply_filters( Visualizer_Plugin::FILTER_CHART_WRAPPER_CLASS, $atts['class'], $atts['id'] );
+		$class = !empty( $class ) ? ' class="' . $class . '"' : '';
+
 		$type = get_post_meta( $chart->ID, Visualizer_Plugin::CF_CHART_TYPE, true );
 
 		// faetch and update settings
@@ -133,7 +144,7 @@ class Visualizer_Module_Frontend extends Visualizer_Module {
 		wp_localize_script( 'visualizer-render', 'visualizer', array( 'charts' => $this->_charts ) );
 
 		// return placeholder div
-		return '<div id="' . $id . '"></div>';
+		return '<div id="' . $id . '"' . $class . '></div>';
 	}
 
 }
