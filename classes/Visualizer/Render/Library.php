@@ -44,13 +44,13 @@ class Visualizer_Render_Library extends Visualizer_Render {
 
 		$delete_url = add_query_arg( array(
 			'action' => Visualizer_Plugin::ACTION_DELETE_CHART,
-			'nonce'  => Visualizer_Security::createNonce(),
+			'nonce'  => wp_create_nonce(),
 			'chart'  => $chart_id,
 		), $ajax_url );
 
 		$clone_url = add_query_arg( array(
 			'action' => Visualizer_Plugin::ACTION_CLONE_CHART,
-			'nonce'  => Visualizer_Security::createNonce( Visualizer_Plugin::ACTION_CLONE_CHART ),
+			'nonce'  => wp_create_nonce( Visualizer_Plugin::ACTION_CLONE_CHART ),
 			'chart'  => $chart_id,
 			'type'   => $this->type,
 		), $ajax_url );
@@ -105,7 +105,7 @@ class Visualizer_Render_Library extends Visualizer_Render {
 			echo '</div>';
 
 			if ( is_array( $this->pagination ) ) {
-				echo '<ul>';
+				echo '<ul class="visualizer-library-pagination">';
 					foreach ( $this->pagination as $page ) {
 						echo '<li class="visualizer-list-item">', $page, '</li>';
 					}
@@ -146,8 +146,26 @@ class Visualizer_Render_Library extends Visualizer_Render {
 				echo ' <a href="javascript:;" class="add-new-h2">', esc_html__( 'Add New', Visualizer_Plugin::NAME ), '</a>';
 			echo '</h2>';
 
+			$this->_renderMessages();
 			$this->_renderLibrary();
 		echo '</div>';
+	}
+
+	/**
+	 * Renders notification messages if need be.
+	 *
+	 * @since 1.4.2
+	 *
+	 * @access private
+	 */
+	private function _renderMessages() {
+		if ( !filter_var( ini_get( 'allow_url_fopen' ), FILTER_VALIDATE_BOOLEAN ) ) {
+			echo '<div class="updated error">';
+				echo '<p>';
+					printf( esc_html__( '%s option is disabled in your php.ini config. Please, enable it by change its value to 1. This option increases the speed of remote CSV uploading.', Visualizer_Plugin::NAME ), '<b>allow_url_fopen</b>' );
+				echo '</p>';
+			echo '</div>';
+		}
 	}
 
 }

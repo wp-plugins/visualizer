@@ -133,6 +133,13 @@ abstract class Visualizer_Render_Sidebar extends Visualizer_Render {
 			$this->title,
 			esc_html__( 'Text to display above the chart.', Visualizer_Plugin::NAME )
 		);
+
+		self::_renderColorPickerItem(
+			esc_html__( 'Chart Title Color', Visualizer_Plugin::NAME ),
+			'titleTextStyle[color]',
+			isset( $this->titleTextStyle['color'] ) ? $this->titleTextStyle['color'] : null,
+			'#000'
+		);
 	}
 
 	/**
@@ -145,13 +152,17 @@ abstract class Visualizer_Render_Sidebar extends Visualizer_Render {
 	protected function _renderGeneralSettings() {
 		self::_renderGroupStart( esc_html__( 'General Settings', Visualizer_Plugin::NAME ) );
 			self::_renderSectionStart();
-				self::_renderSectionDescription( esc_html__( 'Configure title, font styles and legend positioning settings for the chart.', Visualizer_Plugin::NAME ) );
+				self::_renderSectionDescription( esc_html__( 'Configure title, font styles, tooltip, legend and else settings for the chart.', Visualizer_Plugin::NAME ) );
+			self::_renderSectionEnd();
 
+			self::_renderSectionStart( esc_html__( 'Title', Visualizer_Plugin::NAME ), false );
 				$this->_renderChartTitleSettings();
+			self::_renderSectionEnd();
 
+			self::_renderSectionStart( esc_html__( 'Font Styles' ), false );
 				echo '<div class="section-item">';
 					echo '<a class="more-info" href="javascript:;">[?]</a>';
-					echo '<b>', esc_html__( 'Font Family And Size', Visualizer_Plugin::NAME ), '</b>';
+					echo '<b>', esc_html__( 'Family And Size', Visualizer_Plugin::NAME ), '</b>';
 
 					echo '<table class="section-table" cellspacing="0" cellpadding="0" border="0">';
 						echo '<tr>';
@@ -198,8 +209,49 @@ abstract class Visualizer_Render_Sidebar extends Visualizer_Render {
 					$this->_alignments,
 					esc_html__( 'Determines the alignment of the legend.', Visualizer_Plugin::NAME )
 				);
+
+				self::_renderColorPickerItem(
+					esc_html__( 'Font Color', Visualizer_Plugin::NAME ),
+					'legend[textStyle][color]',
+					isset( $this->legend['textStyle']['color'] ) ? $this->legend['textStyle']['color'] : null,
+					'#000'
+				);
+			self::_renderSectionEnd();
+
+			self::_renderSectionStart( esc_html__( 'Tooltip', Visualizer_Plugin::NAME ), false );
+				$this->_renderTooltipSettigns();
 			self::_renderSectionEnd();
 		self::_renderGroupEnd();
+	}
+
+	/**
+	 * Renders tooltip settings section.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @access protected
+	 */
+	protected function _renderTooltipSettigns() {
+		self::_renderSelectItem(
+			esc_html__( 'Trigger', Visualizer_Plugin::NAME ),
+			'tooltip[trigger]',
+			isset( $this->tooltip['trigger'] ) ? $this->tooltip['trigger'] : null,
+			array(
+				''          => '',
+				'focus'     => esc_html__( 'The tooltip will be displayed when the user hovers over an element', Visualizer_Plugin::NAME ),
+				'selection' => esc_html__( 'The tooltip will be displayed when the user selects an element', Visualizer_Plugin::NAME ),
+				'none'      => esc_html__( 'The tooltip will not be displayed', Visualizer_Plugin::NAME ),
+			),
+			esc_html__( 'Determines the user interaction that causes the tooltip to be displayed.', Visualizer_Plugin::NAME )
+		);
+
+		self::_renderSelectItem(
+			esc_html__( 'Show Color Code', Visualizer_Plugin::NAME ),
+			'tooltip[showColorCode]',
+			isset( $this->tooltip['showColorCode'] ) ? $this->tooltip['showColorCode'] : null,
+			$this->_yesno,
+			esc_html__( 'If set to yes, will show colored squares next to the slice information in the tooltip.', Visualizer_Plugin::NAME )
+		);
 	}
 
 	/**
@@ -253,12 +305,20 @@ abstract class Visualizer_Render_Sidebar extends Visualizer_Render {
 					'#666'
 				);
 
+				$background_color = !empty( $this->backgroundColor['fill'] ) ? $this->backgroundColor['fill'] : null;
 				self::_renderColorPickerItem(
 					esc_html__( 'Background Color', Visualizer_Plugin::NAME ),
 					'backgroundColor[fill]',
-					!empty( $this->backgroundColor['fill'] ) ? $this->backgroundColor['fill'] : null,
+					$background_color,
 					'#fff'
 				);
+
+				echo '<div class="section-item">';
+					echo '<label>';
+						echo '<input type="checkbox" class="control-checkbox" name="backgroundColor[fill]" value="transparent"', checked( $background_color, 'transparent', false ), '> ';
+						esc_html_e( 'Transparent background' );
+					echo '</label>';
+				echo '</div>';
 			self::_renderSectionEnd();
 
 			self::_renderSectionStart( esc_html__( 'Chart Area', Visualizer_Plugin::NAME ), false );
@@ -450,6 +510,39 @@ abstract class Visualizer_Render_Sidebar extends Visualizer_Render {
 		echo '<div class="section-item">';
 			echo '<div class="section-description">', $description, '</div>';
 		echo '</div>';
+	}
+
+	/**
+	 * Renders format field according to series type.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @access protected
+	 * @param int $index The index of the series.
+	 */
+	protected function _renderFormatField( $index = 0 ) {
+		switch ( $this->__series[$index + 1]['type'] ) {
+			case 'number':
+				self::_renderTextItem(
+					esc_html__( 'Number Format', Visualizer_Plugin::NAME ),
+					'series[' . $index . '][format]',
+					isset( $this->series[$index]['format'] ) ? $this->series[$index]['format'] : '',
+					sprintf( esc_html__( 'Enter custom format pattern to apply to this series value, similar to the %sICU pattern set%s. Use something like #,### to get 1,234 as output, or $# to add dollar sign before digits. Pay attention that if you use #%% percentage format then your values will be multiplied by 100.', Visualizer_Plugin::NAME ), '<a href="http://icu-project.org/apiref/icu4c/classDecimalFormat.html#_details" target="_blank">', '</a>' ),
+					'#,###.##'
+				);
+				break;
+			case 'date':
+			case 'datetime':
+			case 'timeofday':
+				self::_renderTextItem(
+					esc_html__( 'Date Format', Visualizer_Plugin::NAME ),
+					'series[' . $index . '][format]',
+					isset( $this->series[$index]['format'] ) ? $this->series[$index]['format'] : '',
+					sprintf( esc_html__( 'Enter custom format pattern to apply to this series value, similar to the %sICU date and time format%s.', Visualizer_Plugin::NAME ), '<a href="http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax" target="_blank">', '</a>' ),
+					'eeee, dd LLLL yyyy'
+				);
+				break;
+		}
 	}
 
 }
