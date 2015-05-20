@@ -1,5 +1,5 @@
 === Visualizer ===
-Contributors: madpixels
+Contributors: themeisle
 Donate link: http://flattr.com/thing/2574985/WordPress-Visualizer
 Tags: chart, charts, charting, graph, graphs, graphing, visualisation, visualise data, visualization, visualize data, HTML5, canvas, pie chart, line chart, bar chart, column chart, gauge chart, area chart, scatter chart, candlestick chart, geo chart, google visualization api
 Requires at least: 3.5
