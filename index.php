@@ -1,35 +1,16 @@
 <?php
 /*
-Plugin Name: WordPress Visualizer
-Plugin URI: https://github.com/madpixelslabs/visualizer
+Plugin Name: Visualizer: Charts and Graphs
+Plugin URI: https://github.com/codeinwp/visualizer
 Description: A simple, easy to use and quite powerful tool to create, manage and embed interactive charts into your WordPress posts and pages. The plugin uses Google Visualization API to render charts, which supports cross-browser compatibility (adopting VML for older IE versions) and cross-platform portability to iOS and new Android releases.
 Version: 1.4.2.3
-Author: Madpixels
-Author URI: http://madpixels.net
+Author: Themeisle
+Author URI: http://themeisle.com
 Donate link: http://flattr.com/thing/2574985/WordPress-Visualizer
 License: GPL v2.0 or later
 License URI: http://www.opensource.org/licenses/gpl-license.php
 */
 
-// +----------------------------------------------------------------------+
-// | Copyright 2013  Madpixels  (email : visualizer@madpixels.net)        |
-// +----------------------------------------------------------------------+
-// | This program is free software; you can redistribute it and/or modify |
-// | it under the terms of the GNU General Public License, version 2, as  |
-// | published by the Free Software Foundation.                           |
-// |                                                                      |
-// | This program is distributed in the hope that it will be useful,      |
-// | but WITHOUT ANY WARRANTY; without even the implied warranty of       |
-// | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        |
-// | GNU General Public License for more details.                         |
-// |                                                                      |
-// | You should have received a copy of the GNU General Public License    |
-// | along with this program; if not, write to the Free Software          |
-// | Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,               |
-// | MA 02110-1301 USA                                                    |
-// +----------------------------------------------------------------------+
-// | Author: Eugene Manuilov <eugene@manuilov.org>                        |
-// +----------------------------------------------------------------------+
 
 // prevent direct access to the plugin folder
 if ( !defined( 'ABSPATH' ) ) {
